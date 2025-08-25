@@ -24,6 +24,20 @@ function MainScreen() {
 
   const containerRef = useRef(null);
 
+  async function passCategories(categories) {
+    try {
+        const response = await fetch('http://localhost:3000/submit-categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ categories }),
+        });
+        const data = await response.json();
+        console.log('Server response:', data);
+      } catch (error) {
+        console.error('Error passing categories:', error);
+      }
+  }
+
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event) {
@@ -193,6 +207,27 @@ function MainScreen() {
             )}
           </div>
         )}
+        <button
+        type="button"
+        className="yourButtonClass"
+        onClick={() => {
+            // Add your button handler here
+            passCategories(selectedCategories);
+        }}
+        style={{
+            marginTop: "12px",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            backgroundColor: "#3b82f6",
+            color: "white",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "600",
+        }}
+        >
+        Submit
+        </button>
       </div>
     </div>
   );
