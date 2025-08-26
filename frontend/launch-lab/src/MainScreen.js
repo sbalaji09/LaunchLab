@@ -26,7 +26,7 @@ function MainScreen() {
 
   async function passCategories(categories) {
     try {
-        const response = await fetch('http://localhost:3000/submit-categories', {
+        const response = await fetch('http://localhost:3001/api/submit-categories', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ categories }),

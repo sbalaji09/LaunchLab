@@ -1,17 +1,26 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const port = 3000;
+const port = 3001;
+
+const { HandleGenerateIdeaList } = require('./api.js');
 
 // Middleware to parse JSON body and enable CORS
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/submit-categories', (req, res) => {
+app.post('/api/submit-categories', (req, res) => {
   const categories = req.body.categories;
   console.log('Received categories:', categories);
-  const ideas = HandleGenerateIdeaList(req)
-  res.json(ideas);
+
+  // Pass categories array to your ideas handler, example:
+  const ideas = HandleGenerateIdeaList(categories);
+  
+  res.json({ ideas });
+});
+
+app.get('/', (req, res) => {
+  console.log("SERVER IS RUNNING");
 })
 
 app.listen(port, () => {
