@@ -1,25 +1,36 @@
 const { execSync } = require('child_process');
 const { generateIdeasPrompt } = require('./prompts.js');
 
-function HandleGenerateIdeaList(metadata) {
-    const prompt = generateIdeasPrompt(metadata);
-  
-    try {
-      // Call the Ollama CLI with the mistral model and prompt
-      // Make sure you have mistral model downloaded: ollama pull mistral
-        const command = `ollama run mistral "${prompt.replace(/"/g, '\\"')}"`;
+function HandleGenerateIdeaList(categories) {
+  const prompt = generateIdeasPrompt(categories);
 
-        const output = execSync(command, { encoding: 'utf8' });
-        console.log(output);
-        // Parse the output JSON if your prompt returns JSON string
-        const response = JSON.parse(output);
+  try {
+    // Escape double quotes in the prompt to safely include in shell command
+    const safePrompt = prompt.replace(/"/g, '\\"');
+    const command = `ollama run mistral "${safePrompt}"`;
 
-        // Assuming the response includes an "ideas" field that is your desired list
-        return response.ideas;
-    } catch (err) {
-      console.error('Error running Mistral via Ollama:', err);
+    // Run the command synchronously and get output as string
+    const output = execSync(command, { encoding: "utf8" });
+
+    // The output is expected to be a JSON array string of idea descriptions
+    // Some LLMs add extra text or formatting, so cleanse it if necessary
+    // Try to extract JSON array from output text using regex, fallback to direct parse
+    const jsonMatch = output.match(/\[.*\]/s);
+    const jsonString = jsonMatch ? jsonMatch[0] : output;
+
+    const ideas = JSON.parse(jsonString);
+
+    // Verify result is an array
+    if (!Array.isArray(ideas)) {
+      console.error("Ollama output JSON is not an array", ideas);
       return null;
     }
+
+    return ideas;
+  } catch (error) {
+    console.error("Error running Mistral via Ollama:", error);
+    return null;
+  }
 }
 
 module.exports = { HandleGenerateIdeaList };

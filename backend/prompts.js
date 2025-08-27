@@ -19,11 +19,13 @@ function generateIdeasPrompt(categories) {
         **Output instructions:**
 
         Return EXACTLY 15 startup ideas as a JSON array. Each idea should be a detailed string that:
-        1. Describes the startup concept
+        1. Describes the startup concept in two to three sentences in a summary
         2. Explains how it incorporates EACH of these categories: ${categories.join(', ')}
         3. Shows clear revenue potential
+        
+        IMPORTANT: Do NOT include any markdown, asterisks, or special formatting in the output strings.
 
-        Format: ["Idea 1: [Concept description] - Incorporates [Category 1] by [explanation], [Category 2] by [explanation], etc.", "Idea 2: [Concept description] - Incorporates...", ...]
+        Format: ["[Concept description]: Two to three sentence summary of the idea; Incorporates [Category 1] by [explanation]; [Category 2] by [explanation], etc.", "[Concept description]: Two to three sentence summary of the idea...", ...]
 
         Respond with ONLY valid JSON array format - no markdown syntax, no introductory text, no explanations outside the JSON array.
 

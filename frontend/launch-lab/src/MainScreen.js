@@ -21,6 +21,7 @@ function MainScreen() {
   const [inputValue, setInputValue] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [ideas, setIdeas] = useState(null); // new state to hold ideas
 
   const containerRef = useRef(null);
 
@@ -33,6 +34,10 @@ function MainScreen() {
         });
         const data = await response.json();
         console.log('Server response:', data);
+        setIdeas(data.ideas); // store ideas in state
+        // Hide input box by resetting related states
+        setShowDropdown(false);
+        setIsInputFocused(false);
       } catch (error) {
         console.error('Error passing categories:', error);
       }
@@ -94,11 +99,11 @@ function MainScreen() {
 
   return (
     <div style={styles.page}>
-      {/* Background gradient elements */}
+      {/* background gradients */}
       <div style={styles.bgGradient1}></div>
       <div style={styles.bgGradient2}></div>
       <div style={styles.bgGradient3}></div>
-      
+
       <div style={styles.container} ref={containerRef}>
         <div style={styles.headerSection}>
           <h1 style={styles.header}>What are you interested in building?</h1>
@@ -106,128 +111,239 @@ function MainScreen() {
             Select categories that match your interests or create your own
           </p>
         </div>
-        
-        <div 
-          style={{
-            ...styles.inputContainer,
-            ...(isInputFocused ? styles.inputContainerFocused : {}),
-            ...(selectedCategories.length > 0 ? styles.inputContainerWithTags : {})
-          }} 
-          onClick={() => {
-            setShowDropdown(true);
-            setIsInputFocused(true);
-          }}
-        >
-          {selectedCategories.map((cat, index) => (
-            <div 
-              key={cat} 
+
+        {!ideas ? (
+          <>
+            <div
               style={{
-                ...styles.tag,
-                animationDelay: `${index * 0.1}s`
+                ...styles.inputContainer,
+                ...(isInputFocused ? styles.inputContainerFocused : {}),
+                ...(selectedCategories.length > 0 ? styles.inputContainerWithTags : {}),
+              }}
+              onClick={() => {
+                setShowDropdown(true);
+                setIsInputFocused(true);
               }}
             >
-              <span>{cat}</span>
-              <button
-                style={styles.closeButton}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeCategory(cat);
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = styles.closeButtonHover.backgroundColor;
-                  e.target.style.color = styles.closeButtonHover.color;
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = "transparent";
-                  e.target.style.color = "#6b7280";
-                }}
-                aria-label={`Remove ${cat}`}
-              >
-                ×
-              </button>
-            </div>
-          ))}
-          <input
-            type="text"
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-            placeholder={selectedCategories.length === 0 ? "Type to search or create categories..." : "Add more..."}
-            style={styles.input}
-          />
-        </div>
-
-        {showDropdown && (
-          <div 
-            style={{
-              ...styles.dropdown,
-              animation: "fadeInUp 0.2s ease-out forwards"
-            }}
-          >
-            {filteredCategories.length === 0 ? (
-              <div style={styles.noResult}>
-                {inputValue.trim() ? `Press Enter to create "${inputValue.trim()}"` : "Start typing to see suggestions"}
-              </div>
-            ) : (
-              <>
-                {inputValue.trim() && !allCategories.includes(inputValue.trim()) && (
-                  <div
-                    style={styles.createOption}
-                    onClick={() => addCategory(inputValue.trim())}
-                    onMouseDown={(e) => e.preventDefault()}
-                  >
-                    <span style={styles.createIcon}>+</span>
-                    Create "{inputValue.trim()}"
-                  </div>
-                )}
-                {filteredCategories.map((cat, index) => (
-                  <div
-                    key={cat}
-                    style={{
-                      ...styles.dropdownItem,
-                      animationDelay: `${index * 0.05}s`
+              {/* Selected categories tags */}
+              {selectedCategories.map((cat, index) => (
+                <div
+                  key={cat}
+                  style={{ ...styles.tag, animationDelay: `${index * 0.1}s` }}
+                >
+                  <span>{cat}</span>
+                  <button
+                    style={styles.closeButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeCategory(cat);
                     }}
-                    onClick={() => addCategory(cat)}
-                    onMouseDown={(e) => e.preventDefault()}
                     onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = styles.dropdownItemHover.backgroundColor;
-                      e.target.style.transform = styles.dropdownItemHover.transform;
+                      e.target.style.backgroundColor = styles.closeButtonHover.backgroundColor;
+                      e.target.style.color = styles.closeButtonHover.color;
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = "#f8fafc";
-                      e.target.style.transform = "translateY(0)";
+                      e.target.style.backgroundColor = "transparent";
+                      e.target.style.color = "#6b7280";
+                    }}
+                    aria-label={`Remove ${cat}`}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <input
+                type="text"
+                value={inputValue}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                placeholder={
+                  selectedCategories.length === 0
+                    ? "Type to search or create categories..."
+                    : "Add more..."
+                }
+                style={styles.input}
+              />
+            </div>
+
+            {showDropdown && (
+              <div
+                style={{
+                  ...styles.dropdown,
+                  animation: "fadeInUp 0.2s ease-out forwards",
+                }}
+              >
+                {filteredCategories.length === 0 ? (
+                  <div style={styles.noResult}>
+                    {inputValue.trim()
+                      ? `Press Enter to create "${inputValue.trim()}"`
+                      : "Start typing to see suggestions"}
+                  </div>
+                ) : (
+                  <>
+                    {inputValue.trim() &&
+                      !allCategories.includes(inputValue.trim()) && (
+                        <div
+                          style={styles.createOption}
+                          onClick={() => addCategory(inputValue.trim())}
+                          onMouseDown={(e) => e.preventDefault()}
+                        >
+                          <span style={styles.createIcon}>+</span>
+                          Create "{inputValue.trim()}"
+                        </div>
+                      )}
+                    {filteredCategories.map((cat, index) => (
+                      <div
+                        key={cat}
+                        style={{
+                          ...styles.dropdownItem,
+                          animationDelay: `${index * 0.05}s`,
+                        }}
+                        onClick={() => addCategory(cat)}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor =
+                            styles.dropdownItemHover.backgroundColor;
+                          e.target.style.transform =
+                            styles.dropdownItemHover.transform;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = "#f8fafc";
+                          e.target.style.transform = "translateY(0)";
+                        }}
+                      >
+                        {cat}
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+
+            <button
+              type="button"
+              className="yourButtonClass"
+              onClick={() => {
+                passCategories(selectedCategories);
+              }}
+              style={{
+                marginTop: "12px",
+                padding: "10px 20px",
+                borderRadius: "8px",
+                backgroundColor: "#3b82f6",
+                color: "white",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "16px",
+                fontWeight: "600",
+              }}
+            >
+              Submit
+            </button>
+          </>
+        ) : (
+          // Show ideas when available, hide input box
+          <div>
+            <h2 style={{ fontWeight: "800", fontSize: "28px", color: "#1f2937", marginBottom: "32px" }}>
+              Generated Ideas
+            </h2>
+            <div style={{ display: "grid", gap: "28px", marginTop: "20px" }}>
+              {ideas.map((idea, index) => {
+                // Split on first colon to separate name & rest
+                const [titlePart, rest] = idea.split(/:(.+)/);
+                const title = titlePart.replace(/^['"]|['"]$/g, '').trim();
+
+                // Split rest into description and categories (starting with "Incorporates")
+                const incorporatesIndex = rest.indexOf("Incorporates");
+                const description =
+                  incorporatesIndex >= 0
+                    ? rest.slice(0, incorporatesIndex).trim()
+                    : rest.trim();
+
+                const incorporatesText =
+                  incorporatesIndex >= 0
+                    ? rest.slice(incorporatesIndex).trim()
+                    : "";
+
+                const categoriesList = incorporatesText
+                  ? incorporatesText.split(";").map((s) =>
+                      s.replace(/^Incorporates\s*/, "").trim()
+                    )
+                  : [];
+
+                return (
+                  <div
+                    key={index}
+                    style={{
+                      backgroundColor: "#ffffff",
+                      borderRadius: "16px",
+                      padding: "28px 32px",
+                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                      border: "1px solid #e0e7ff",
+                      transition: "transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out",
+                      cursor: "default",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow = "0 10px 15px rgba(59, 130, 246, 0.3)";
+                      e.currentTarget.style.transform = "translateY(-4px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
+                      e.currentTarget.style.transform = "translateY(0)";
                     }}
                   >
-                    {cat}
+                    <h3
+                      style={{
+                        color: "#2563eb",
+                        fontWeight: "900",
+                        fontSize: "24px",
+                        marginBottom: "14px",
+                        letterSpacing: "0.02em",
+                      }}
+                    >
+                      {title}
+                    </h3>
+                    <p
+                      style={{
+                        fontWeight: "500",
+                        fontSize: "17px",
+                        color: "#374151",
+                        marginBottom: "20px",
+                        lineHeight: "1.6",
+                        letterSpacing: "0.005em",
+                      }}
+                    >
+                      {description}
+                    </p>
+                    <ul
+                      style={{
+                        margin: 0,
+                        paddingLeft: "20px",
+                        fontSize: "15px",
+                        fontWeight: "500",
+                        color: "#64748b",
+                        lineHeight: "1.7",
+                        listStyleType: "disc",
+                      }}
+                    >
+                      {categoriesList.map((cat, i) => (
+                        <li key={i} style={{ marginBottom: "8px" }}>
+                          {cat}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                ))}
-              </>
-            )}
+                );
+              })}
+            </div>
           </div>
+
+
+
+
         )}
-        <button
-        type="button"
-        className="yourButtonClass"
-        onClick={() => {
-            // Add your button handler here
-            passCategories(selectedCategories);
-        }}
-        style={{
-            marginTop: "12px",
-            padding: "10px 20px",
-            borderRadius: "8px",
-            backgroundColor: "#3b82f6",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "16px",
-            fontWeight: "600",
-        }}
-        >
-        Submit
-        </button>
       </div>
     </div>
   );

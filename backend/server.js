@@ -15,8 +15,8 @@ app.post('/api/submit-categories', (req, res) => {
 
   // Pass categories array to your ideas handler, example:
   const ideas = HandleGenerateIdeaList(categories);
-  
-  res.json({ ideas });
+  console.log("IDEAS", ideas);
+  res.json({"ideas": ideas });
 });
 
 app.get('/', (req, res) => {
