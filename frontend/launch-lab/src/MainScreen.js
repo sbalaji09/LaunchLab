@@ -43,6 +43,13 @@ function MainScreen() {
       }
   }
 
+  function handleSubmitIdea(idea) {
+    // Perform whatever action you want for this idea
+    // For example, send idea to backend, show modal, etc.
+    console.log("Submitted idea:", idea);
+  }
+  
+
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event) {
@@ -251,22 +258,17 @@ function MainScreen() {
             </h2>
             <div style={{ display: "grid", gap: "28px", marginTop: "20px" }}>
               {ideas.map((idea, index) => {
-                // Split on first colon to separate name & rest
+                // Parse idea string (title, description, categories)
                 const [titlePart, rest] = idea.split(/:(.+)/);
                 const title = titlePart.replace(/^['"]|['"]$/g, '').trim();
 
-                // Split rest into description and categories (starting with "Incorporates")
                 const incorporatesIndex = rest.indexOf("Incorporates");
-                const description =
-                  incorporatesIndex >= 0
-                    ? rest.slice(0, incorporatesIndex).trim()
-                    : rest.trim();
-
-                const incorporatesText =
-                  incorporatesIndex >= 0
-                    ? rest.slice(incorporatesIndex).trim()
-                    : "";
-
+                const description = incorporatesIndex >= 0
+                  ? rest.slice(0, incorporatesIndex).trim()
+                  : rest.trim();
+                const incorporatesText = incorporatesIndex >= 0
+                  ? rest.slice(incorporatesIndex).trim()
+                  : "";
                 const categoriesList = incorporatesText
                   ? incorporatesText.split(";").map((s) =>
                       s.replace(/^Incorporates\s*/, "").trim()
@@ -282,67 +284,65 @@ function MainScreen() {
                       padding: "28px 32px",
                       boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                       border: "1px solid #e0e7ff",
-                      transition: "transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out",
-                      cursor: "default",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = "0 10px 15px rgba(59, 130, 246, 0.3)";
-                      e.currentTarget.style.transform = "translateY(-4px)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
-                      e.currentTarget.style.transform = "translateY(0)";
+                      marginBottom: "12px",
                     }}
                   >
-                    <h3
-                      style={{
-                        color: "#2563eb",
-                        fontWeight: "900",
-                        fontSize: "24px",
-                        marginBottom: "14px",
-                        letterSpacing: "0.02em",
-                      }}
-                    >
+                    <h3 style={{
+                      color: "#2563eb",
+                      fontWeight: "900",
+                      fontSize: "24px",
+                      marginBottom: "14px",
+                      letterSpacing: "0.02em",
+                    }}>
                       {title}
                     </h3>
-                    <p
-                      style={{
-                        fontWeight: "500",
-                        fontSize: "17px",
-                        color: "#374151",
-                        marginBottom: "20px",
-                        lineHeight: "1.6",
-                        letterSpacing: "0.005em",
-                      }}
-                    >
+                    <p style={{
+                      fontWeight: "500",
+                      fontSize: "17px",
+                      color: "#374151",
+                      marginBottom: "20px",
+                      lineHeight: "1.6",
+                      letterSpacing: "0.005em",
+                    }}>
                       {description}
                     </p>
-                    <ul
-                      style={{
-                        margin: 0,
-                        paddingLeft: "20px",
-                        fontSize: "15px",
-                        fontWeight: "500",
-                        color: "#64748b",
-                        lineHeight: "1.7",
-                        listStyleType: "disc",
-                      }}
-                    >
+                    <ul style={{
+                      margin: 0,
+                      paddingLeft: "20px",
+                      fontSize: "15px",
+                      fontWeight: "500",
+                      color: "#64748b",
+                      lineHeight: "1.7",
+                      listStyleType: "disc",
+                    }}>
                       {categoriesList.map((cat, i) => (
                         <li key={i} style={{ marginBottom: "8px" }}>
                           {cat}
                         </li>
                       ))}
                     </ul>
+                    <button
+                      style={{
+                        marginTop: "16px",
+                        padding: "10px 22px",
+                        borderRadius: "10px",
+                        backgroundColor: "#16a34a",
+                        color: "white",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "700",
+                        transition: "background-color 0.2s",
+                      }}
+                      onClick={() => handleSubmitIdea(idea)}
+                    >
+                      Submit This Idea
+                    </button>
                   </div>
                 );
               })}
             </div>
           </div>
-
-
-
-
         )}
       </div>
     </div>

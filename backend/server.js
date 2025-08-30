@@ -19,6 +19,10 @@ app.post('/api/submit-categories', (req, res) => {
   res.json({"ideas": ideas });
 });
 
+app.post('/api/refine-idea', (req, res) => {
+  const title = req.body[0]
+  const description = req.body[1]
+})
 app.get('/', (req, res) => {
   console.log("SERVER IS RUNNING");
 })
