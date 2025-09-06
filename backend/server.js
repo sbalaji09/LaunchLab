@@ -3,7 +3,7 @@ const cors = require('cors');
 const app = express();
 const port = 3001;
 
-const { HandleGenerateIdeaList } = require('./api.js');
+const { HandleGenerateIdeaList, HandleRefineIdea } = require('./api.js');
 
 // Middleware to parse JSON body and enable CORS
 app.use(cors());
@@ -19,10 +19,21 @@ app.post('/api/submit-categories', (req, res) => {
   res.json({"ideas": ideas });
 });
 
-app.post('/api/refine-idea', (req, res) => {
-  const title = req.body[0]
-  const description = req.body[1]
-})
+app.post('/api/refine-idea', async (req, res) => {
+  try {
+    const { basic_idea } = req.body.idea;
+
+    const idea = HandleRefineIdea(basic_idea);
+    console.log("IDEA", idea);
+    res.json({"idea": idea})
+    
+  } catch (err) {
+    console.error('Error in /api/refine-idea:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 app.get('/', (req, res) => {
   console.log("SERVER IS RUNNING");
 })

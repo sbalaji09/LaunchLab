@@ -22,6 +22,7 @@ function MainScreen() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [ideas, setIdeas] = useState(null); // new state to hold ideas
+  const [refinedIdea, setRefinedIdea] = useState(null); // new refined idea state
 
   const containerRef = useRef(null);
 
@@ -43,10 +44,23 @@ function MainScreen() {
       }
   }
 
-  function handleSubmitIdea(idea) {
+  async function handleSubmitIdea(idea) {
     // Perform whatever action you want for this idea
     // For example, send idea to backend, show modal, etc.
-    console.log("Submitted idea:", idea);
+    console.log(idea);
+    try {
+      const response = await fetch('http://localhost:3001/api/refine-idea', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({idea}), // send as separate fields
+      });
+      const data = await response.json();
+      setRefinedIdea(data); // store refined result
+      console.log('Server response:', data);
+      // You can store refined data in state to display or process
+    } catch (error) {
+      console.error('Error refining idea:', error);
+    }
   }
   
 
@@ -342,6 +356,34 @@ function MainScreen() {
                 );
               })}
             </div>
+
+            {refinedIdea && (
+              <div
+                style={{
+                  marginTop: "40px",
+                  padding: "24px",
+                  borderRadius: "16px",
+                  backgroundColor: "#f9fafb",
+                  border: "1px solid #e5e7eb",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                }}
+              >
+                <h3 style={{ fontSize: "22px", fontWeight: "800", color: "#111827" }}>
+                  Refined Idea
+                </h3>
+                <pre
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    marginTop: "12px",
+                    fontSize: "15px",
+                    color: "#374151",
+                    lineHeight: "1.6",
+                  }}
+                >
+                  {JSON.stringify(refinedIdea, null, 2)}
+                </pre>
+              </div>
+            )}
           </div>
         )}
       </div>
