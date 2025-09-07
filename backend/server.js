@@ -36,6 +36,7 @@ app.post('/api/refine-idea', async (req, res) => {
 
 app.get('/', (req, res) => {
   console.log("SERVER IS RUNNING");
-})
+  res.json({ message: "Server is running!" }); // ✅ Send response
+});
 
 module.exports = app;
