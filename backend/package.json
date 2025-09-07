@@ -3,5 +3,10 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "snoowrap": "^1.23.0"
-  }
+  },
+  "scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start"
+  } 
 }
