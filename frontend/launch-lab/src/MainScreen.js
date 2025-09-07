@@ -56,7 +56,7 @@ function MainScreen() {
       });
       const data = await response.json();
       setRefinedIdea(data); // store refined result
-      console.log('Server response:', data);
+      setIdeas(null);
       // You can store refined data in state to display or process
     } catch (error) {
       console.error('Error refining idea:', error);
@@ -120,7 +120,6 @@ function MainScreen() {
 
   return (
     <div style={styles.page}>
-      {/* background gradients */}
       <div style={styles.bgGradient1}></div>
       <div style={styles.bgGradient2}></div>
       <div style={styles.bgGradient3}></div>
@@ -133,259 +132,337 @@ function MainScreen() {
           </p>
         </div>
 
-        {!ideas ? (
-          <>
-            <div
-              style={{
-                ...styles.inputContainer,
-                ...(isInputFocused ? styles.inputContainerFocused : {}),
-                ...(selectedCategories.length > 0 ? styles.inputContainerWithTags : {}),
-              }}
-              onClick={() => {
-                setShowDropdown(true);
-                setIsInputFocused(true);
-              }}
-            >
-              {/* Selected categories tags */}
-              {selectedCategories.map((cat, index) => (
-                <div
-                  key={cat}
-                  style={{ ...styles.tag, animationDelay: `${index * 0.1}s` }}
-                >
-                  <span>{cat}</span>
-                  <button
-                    style={styles.closeButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeCategory(cat);
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = styles.closeButtonHover.backgroundColor;
-                      e.target.style.color = styles.closeButtonHover.color;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = "transparent";
-                      e.target.style.color = "#6b7280";
-                    }}
-                    aria-label={`Remove ${cat}`}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-              <input
-                type="text"
-                value={inputValue}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-                placeholder={
-                  selectedCategories.length === 0
-                    ? "Type to search or create categories..."
-                    : "Add more..."
-                }
-                style={styles.input}
-              />
-            </div>
-
-            {showDropdown && (
+        {/* Show input and candidate ideas only if no refinedIdea */}
+        {!refinedIdea ? (
+          !ideas ? (
+            <>
               <div
                 style={{
-                  ...styles.dropdown,
-                  animation: "fadeInUp 0.2s ease-out forwards",
+                  ...styles.inputContainer,
+                  ...(isInputFocused ? styles.inputContainerFocused : {}),
+                  ...(selectedCategories.length > 0 ? styles.inputContainerWithTags : {}),
+                }}
+                onClick={() => {
+                  setShowDropdown(true);
+                  setIsInputFocused(true);
                 }}
               >
-                {filteredCategories.length === 0 ? (
-                  <div style={styles.noResult}>
-                    {inputValue.trim()
-                      ? `Press Enter to create "${inputValue.trim()}"`
-                      : "Start typing to see suggestions"}
-                  </div>
-                ) : (
-                  <>
-                    {inputValue.trim() &&
-                      !allCategories.includes(inputValue.trim()) && (
-                        <div
-                          style={styles.createOption}
-                          onClick={() => addCategory(inputValue.trim())}
-                          onMouseDown={(e) => e.preventDefault()}
-                        >
-                          <span style={styles.createIcon}>+</span>
-                          Create "{inputValue.trim()}"
-                        </div>
-                      )}
-                    {filteredCategories.map((cat, index) => (
-                      <div
-                        key={cat}
-                        style={{
-                          ...styles.dropdownItem,
-                          animationDelay: `${index * 0.05}s`,
-                        }}
-                        onClick={() => addCategory(cat)}
-                        onMouseDown={(e) => e.preventDefault()}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor =
-                            styles.dropdownItemHover.backgroundColor;
-                          e.target.style.transform =
-                            styles.dropdownItemHover.transform;
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = "#f8fafc";
-                          e.target.style.transform = "translateY(0)";
-                        }}
-                      >
-                        {cat}
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
-            )}
-
-            <button
-              type="button"
-              className="yourButtonClass"
-              onClick={() => {
-                passCategories(selectedCategories);
-              }}
-              style={{
-                marginTop: "12px",
-                padding: "10px 20px",
-                borderRadius: "8px",
-                backgroundColor: "#3b82f6",
-                color: "white",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "16px",
-                fontWeight: "600",
-              }}
-            >
-              Submit
-            </button>
-          </>
-        ) : (
-          // Show ideas when available, hide input box
-          <div>
-            <h2 style={{ fontWeight: "800", fontSize: "28px", color: "#1f2937", marginBottom: "32px" }}>
-              Generated Ideas
-            </h2>
-            <div style={{ display: "grid", gap: "28px", marginTop: "20px" }}>
-              {ideas.map((idea, index) => {
-                // Parse idea string (title, description, categories)
-                const [titlePart, rest] = idea.split(/:(.+)/);
-                const title = titlePart.replace(/^['"]|['"]$/g, '').trim();
-
-                const incorporatesIndex = rest.indexOf("Incorporates");
-                const description = incorporatesIndex >= 0
-                  ? rest.slice(0, incorporatesIndex).trim()
-                  : rest.trim();
-                const incorporatesText = incorporatesIndex >= 0
-                  ? rest.slice(incorporatesIndex).trim()
-                  : "";
-                const categoriesList = incorporatesText
-                  ? incorporatesText.split(";").map((s) =>
-                      s.replace(/^Incorporates\s*/, "").trim()
-                    )
-                  : [];
-
-                return (
+                {selectedCategories.map((cat, index) => (
                   <div
-                    key={index}
-                    style={{
-                      backgroundColor: "#ffffff",
-                      borderRadius: "16px",
-                      padding: "28px 32px",
-                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                      border: "1px solid #e0e7ff",
-                      marginBottom: "12px",
-                    }}
+                    key={cat}
+                    style={{ ...styles.tag, animationDelay: `${index * 0.1}s` }}
                   >
-                    <h3 style={{
-                      color: "#2563eb",
-                      fontWeight: "900",
-                      fontSize: "24px",
-                      marginBottom: "14px",
-                      letterSpacing: "0.02em",
-                    }}>
-                      {title}
-                    </h3>
-                    <p style={{
-                      fontWeight: "500",
-                      fontSize: "17px",
-                      color: "#374151",
-                      marginBottom: "20px",
-                      lineHeight: "1.6",
-                      letterSpacing: "0.005em",
-                    }}>
-                      {description}
-                    </p>
-                    <ul style={{
-                      margin: 0,
-                      paddingLeft: "20px",
-                      fontSize: "15px",
-                      fontWeight: "500",
-                      color: "#64748b",
-                      lineHeight: "1.7",
-                      listStyleType: "disc",
-                    }}>
-                      {categoriesList.map((cat, i) => (
-                        <li key={i} style={{ marginBottom: "8px" }}>
-                          {cat}
-                        </li>
-                      ))}
-                    </ul>
+                    <span>{cat}</span>
                     <button
-                      style={{
-                        marginTop: "16px",
-                        padding: "10px 22px",
-                        borderRadius: "10px",
-                        backgroundColor: "#16a34a",
-                        color: "white",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: "16px",
-                        fontWeight: "700",
-                        transition: "background-color 0.2s",
+                      style={styles.closeButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeCategory(cat);
                       }}
-                      onClick={() => handleSubmitIdea(idea)}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = styles.closeButtonHover.backgroundColor;
+                        e.target.style.color = styles.closeButtonHover.color;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = "transparent";
+                        e.target.style.color = "#6b7280";
+                      }}
+                      aria-label={`Remove ${cat}`}
                     >
-                      Submit This Idea
+                      ×
                     </button>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  placeholder={
+                    selectedCategories.length === 0
+                      ? "Type to search or create categories..."
+                      : "Add more..."
+                  }
+                  style={styles.input}
+                />
+              </div>
 
-            {refinedIdea && (
-              <div
-                style={{
-                  marginTop: "40px",
-                  padding: "24px",
-                  borderRadius: "16px",
-                  backgroundColor: "#f9fafb",
-                  border: "1px solid #e5e7eb",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                }}
-              >
-                <h3 style={{ fontSize: "22px", fontWeight: "800", color: "#111827" }}>
-                  Refined Idea
-                </h3>
-                <pre
+              {showDropdown && (
+                <div
                   style={{
-                    whiteSpace: "pre-wrap",
-                    marginTop: "12px",
-                    fontSize: "15px",
-                    color: "#374151",
-                    lineHeight: "1.6",
+                    ...styles.dropdown,
+                    animation: "fadeInUp 0.2s ease-out forwards",
                   }}
                 >
-                  {JSON.stringify(refinedIdea, null, 2)}
-                </pre>
+                  {filteredCategories.length === 0 ? (
+                    <div style={styles.noResult}>
+                      {inputValue.trim()
+                        ? `Press Enter to create "${inputValue.trim()}"`
+                        : "Start typing to see suggestions"}
+                    </div>
+                  ) : (
+                    <>
+                      {inputValue.trim() &&
+                        !allCategories.includes(inputValue.trim()) && (
+                          <div
+                            style={styles.createOption}
+                            onClick={() => addCategory(inputValue.trim())}
+                            onMouseDown={(e) => e.preventDefault()}
+                          >
+                            <span style={styles.createIcon}>+</span>
+                            Create "{inputValue.trim()}"
+                          </div>
+                        )}
+                      {filteredCategories.map((cat, index) => (
+                        <div
+                          key={cat}
+                          style={{
+                            ...styles.dropdownItem,
+                            animationDelay: `${index * 0.05}s`,
+                          }}
+                          onClick={() => addCategory(cat)}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor =
+                              styles.dropdownItemHover.backgroundColor;
+                            e.target.style.transform =
+                              styles.dropdownItemHover.transform;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#f8fafc";
+                            e.target.style.transform = "translateY(0)";
+                          }}
+                        >
+                          {cat}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+              )}
+
+              <button
+                type="button"
+                className="yourButtonClass"
+                onClick={() => {
+                  passCategories(selectedCategories);
+                }}
+                style={{
+                  marginTop: "12px",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  backgroundColor: "#3b82f6",
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                }}
+              >
+                Submit
+              </button>
+            </>
+          ) : (
+            <div>
+              <h2 style={{ fontWeight: "800", fontSize: "28px", color: "#1f2937", marginBottom: "32px" }}>
+                Generated Ideas
+              </h2>
+              <div style={{ display: "grid", gap: "28px", marginTop: "20px" }}>
+                {ideas.map((idea, index) => {
+                  // Parse idea string (title, description, categories)
+                  // Remove leading/trailing quotes, then remove a trailing comma from the title if there is one
+                  const [titlePart, rest] = idea.split(/:(.+)/);
+                  let title = titlePart.replace(/^['"]|['"]$/g, '').trim();
+                  if (title.endsWith(",")) {
+                    title = title.slice(0, -1).trim();
+                  }
+                  const incorporatesIndex = rest.indexOf("Incorporates");
+                  const description = incorporatesIndex >= 0
+                    ? rest.slice(0, incorporatesIndex).trim()
+                    : rest.trim();
+                  const incorporatesText = incorporatesIndex >= 0
+                    ? rest.slice(incorporatesIndex).trim()
+                    : "";
+                  const categoriesList = incorporatesText
+                    ? incorporatesText
+                        .split(";")
+                        .map((s) => s.replace(/^Incorporates\s*/, "").trim())
+                        .filter((s) => s.length > 0)
+                    : [];
+
+                  return (
+                    <div
+                      key={index}
+                      style={{
+                        backgroundColor: "#ffffff",
+                        borderRadius: "16px",
+                        padding: "28px 32px",
+                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                        border: "1px solid #e0e7ff",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <h3 style={{
+                        color: "#2563eb",
+                        fontWeight: "900",
+                        fontSize: "24px",
+                        marginBottom: "10px",
+                        letterSpacing: "0.02em",
+                      }}>
+                        {title}
+                      </h3>
+                      <div style={{
+                        fontWeight: "500",
+                        fontSize: "17px",
+                        color: "#374151",
+                        lineHeight: "1.7",
+                        letterSpacing: "0.005em",
+                        marginBottom: "16px",
+                      }}>
+                        <span style={{ fontWeight: "700", color: "#1e293b" }}>Description: </span>
+                        {description}
+                      </div>
+                      {categoriesList.length > 0 && (
+                        <div style={{ marginBottom: "10px" }}>
+                          <span style={{ fontWeight: "700", color: "#0ea5e9" }}>Incorporates:</span>
+                          <ul style={{
+                            margin: "10px 0 0 18px",
+                            padding: 0,
+                            fontSize: "15px",
+                            fontWeight: "500",
+                            color: "#64748b",
+                            lineHeight: "1.8",
+                          }}>
+                            {categoriesList.map((cat, i) => (
+                              <li key={i} style={{ marginBottom: "5px" }}>
+                                {cat}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      <button
+                        style={{
+                          marginTop: "16px",
+                          padding: "10px 22px",
+                          borderRadius: "10px",
+                          backgroundColor: "#16a34a",
+                          color: "white",
+                          border: "none",
+                          cursor: "pointer",
+                          fontSize: "16px",
+                          fontWeight: "700",
+                          transition: "background-color 0.2s",
+                        }}
+                        onClick={() => handleSubmitIdea(idea)}
+                      >
+                        Submit This Idea
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
-            )}
-          </div>
+            </div>
+
+          )
+        ) : (
+          <RefinedIdeaCard refinedIdea={refinedIdea.idea[0]} />
         )}
+      </div>
+    </div>
+  );
+}
+
+function RefinedIdeaCard({ refinedIdea }) {
+  if (!refinedIdea) return null;
+  // Format the user pricing (add $ if missing)
+  const userPricing = refinedIdea.pricing?.user_pricing?.toString();
+  const devCost = refinedIdea.pricing?.development_cost?.toString();
+  return (
+    <div
+      style={{
+        margin: "0 auto",
+        padding: "32px 36px",
+        borderRadius: "20px",
+        backgroundColor: "#fff",
+        border: "1.5px solid #e0e7ff",
+        boxShadow:
+          "0 6px 28px 2px rgba(59,130,246,0.08), 0 0.5px 1px 0px rgba(0,0,0,0.04)",
+        maxWidth: "580px",
+        marginTop: "32px",
+        fontSize: "17px",
+      }}
+    >
+      <h2
+        style={{
+          color: "#1d4ed8",
+          fontWeight: "900",
+          fontSize: "2rem",
+          letterSpacing: "0.02em",
+          marginBottom: "10px",
+        }}
+      >
+        {refinedIdea.name}
+      </h2>
+      <p
+        style={{
+          color: "#374151",
+          fontWeight: "500",
+          fontSize: "18px",
+          marginBottom: "22px",
+          lineHeight: "1.65",
+        }}
+      >
+        {refinedIdea.summary}
+      </p>
+      <div style={{ marginBottom: "18px" }}>
+        <span style={{color:"#0ea5e9", fontWeight:"700"}}>Key Features:</span>
+        <ul style={{ margin: "12px 0 0 20px", color:"#1e293b", fontWeight: 400 }}>
+          {refinedIdea.features &&
+            refinedIdea.features.map((feat, idx) => (
+              <li style={{ marginBottom: 6 }} key={idx}>
+                {feat}
+              </li>
+            ))}
+        </ul>
+      </div>
+      <div style={{ marginBottom: "18px" }}>
+        <span style={{color:"#0ea5e9", fontWeight:"700"}}>Tech Stack:</span>
+        <div style={{ margin: "10px 0 0 4px", color:"#4b5563", fontWeight: 400 }}>
+          {refinedIdea.tech_stack &&
+            refinedIdea.tech_stack.map((tech, idx) => (
+              <span
+                key={idx}
+                style={{
+                  background: "#e0e7ff",
+                  color: "#1e293b",
+                  borderRadius: "8px",
+                  padding: "4px 12px",
+                  marginRight: "8px",
+                  display: "inline-block",
+                  marginBottom: "7px",
+                  fontSize: "15px"
+                }}
+              >
+                {tech}
+              </span>
+            ))}
+        </div>
+      </div>
+      <div style={{ marginBottom: "10px" }}>
+        <span style={{color:"#0ea5e9", fontWeight:"700"}}>Pricing and Cost:</span>
+        <div style={{ marginTop: "10px", fontWeight: 400 }}>
+          <div>
+            <strong>Estimated Development Cost: </strong>
+            ${devCost}
+          </div>
+          <div>
+            <strong>User Pricing: </strong>
+            {userPricing?.startsWith("$") ? userPricing : "$" + userPricing}
+          </div>
+        </div>
       </div>
     </div>
   );

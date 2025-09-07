@@ -27,7 +27,7 @@ function generateIdeasPrompt(categories) {
 
         IMPORTANT:
         - Do NOT add markdown, asterisks, or any special formatting.
-        - Respond ONLY with a valid JSON array.
+        - Respond ONLY with a valid JSON array of 15 startup ideas.
         - Do NOT include any extra text, explanations, or introductions.
 
         Example format:
@@ -64,6 +64,8 @@ function generateIdeaRefinePrompt(general_idea) {
         - "features": A list of 3-5 concrete, specific product features.
         - "tech_stack": Languages, frameworks, tools, APIs, and integrations used to build the MVP.
         - "pricing": Two parts: (1) estimated MVP development cost, (2) suggested user pricing model.
+            - for the estimated MVP development cost, breakdown the costs including costs for database management, backend instracture platforms, frontend deployment, and others as needed.
+            include the softwares needed for each of the components as well
 
         Example output:
 
