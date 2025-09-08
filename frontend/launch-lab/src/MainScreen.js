@@ -28,7 +28,7 @@ function MainScreen() {
 
   async function passCategories(categories) {
     try {
-        const response = await fetch('http://launch-lab-flax.vercel.app/api/submit-categories', {
+        const response = await fetch('http://localhost:3001/api/submit-categories', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ categories }),
@@ -49,7 +49,7 @@ function MainScreen() {
     // For example, send idea to backend, show modal, etc.
     console.log(idea);
     try {
-      const response = await fetch('http://launch-lab-flax.vercel.app/api/refine-idea', {
+      const response = await fetch('http://localhost:3001/api/refine-idea', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({idea}), // send as separate fields
