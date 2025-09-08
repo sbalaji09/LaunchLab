@@ -45,14 +45,12 @@ function MainScreen() {
   }
 
   async function handleSubmitIdea(idea) {
-    // Perform whatever action you want for this idea
-    // For example, send idea to backend, show modal, etc.
-    console.log(idea);
+    console.log('Submitting idea:', idea);
     try {
       const response = await fetch('http://localhost:3001/api/refine-idea', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({idea}), // send as separate fields
+        body: JSON.stringify({ idea: { basic_idea: idea } }), // Match expected backend format
       });
       const data = await response.json();
       setRefinedIdea(data); // store refined result
