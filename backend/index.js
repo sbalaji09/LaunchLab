@@ -30,6 +30,7 @@ app.post('/api/submit-categories', (req, res) => {
 app.post('/api/refine-idea', async (req, res) => {
   try {
     const { basic_idea } = req.body.idea || {};
+    console.log('RECEIVED IDEA', basic_idea);
     
     if (!basic_idea) {
       return res.status(400).json({ error: 'basic_idea is required' });
