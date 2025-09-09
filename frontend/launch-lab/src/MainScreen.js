@@ -276,28 +276,33 @@ function MainScreen() {
                   title = title.slice(0, -1).trim();
                 }
                 
+                // Find where "Incorporates" starts
                 const incorporatesIndex = rest.indexOf("Incorporates");
-                let description = incorporatesIndex >= 0
-                ? rest.slice(0, incorporatesIndex).trim()
-                : rest.trim();
                 
-                // Remove trailing semicolon if present
+                // Extract description portion before "Incorporates"
+                let description = incorporatesIndex >= 0
+                  ? rest.slice(0, incorporatesIndex).trim()
+                  : rest.trim();
+                
+                // Remove trailing semicolon from description if present
                 if (description.endsWith(';')) {
                   description = description.slice(0, -1).trim();
-                }              
-
+                }
+                
+                // Extract the incorporatesText including and after "Incorporates"
                 const incorporatesText = incorporatesIndex >= 0
                   ? rest.slice(incorporatesIndex).trim()
                   : "";
-
-                // Split the incorporates text on semicolon for bullet points
+                
+                // Split incorporatesText on semicolons; removes "Incorporates" prefix from first item
                 const categoriesList = incorporatesText
                   ? incorporatesText
                       .replace(/^Incorporates\s*/, "")
-                      .split(";")
-                      .map((s) => s.trim())
-                      .filter((s) => s.length > 0)
+                      .split(/\s*;\s*/)  // split on semicolons with optional spaces around
+                      .map(s => s.trim())
+                      .filter(s => s.length > 0)
                   : [];
+                
 
                 // Specifically fix "Incorporates Travel by ... Monetization through ..." into two bullets
                 const processedCategoriesList = [];
