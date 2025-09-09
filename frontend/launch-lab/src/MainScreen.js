@@ -268,27 +268,53 @@ function MainScreen() {
                 Generated Ideas
               </h2>
               <div style={{ display: "grid", gap: "28px", marginTop: "20px" }}>
-                {ideas.map((idea, index) => {
-                  // Parse idea string (title, description, categories)
-                  // Remove leading/trailing quotes, then remove a trailing comma from the title if there is one
-                  const [titlePart, rest] = idea.split(/:(.+)/);
-                  let title = titlePart.replace(/^['"]|['"]$/g, '').trim();
-                  if (title.endsWith(",")) {
-                    title = title.slice(0, -1).trim();
+              {ideas.map((idea, index) => {
+                // Parse idea string (title, description, categories)
+                const [titlePart, rest] = idea.split(/:(.+)/);
+                let title = titlePart.replace(/^['"]|['"]$/g, '').trim();
+                if (title.endsWith(",") || title.endsWith(";")) {
+                  title = title.slice(0, -1).trim();
+                }
+                
+                const incorporatesIndex = rest.indexOf("Incorporates");
+                let description = incorporatesIndex >= 0
+                ? rest.slice(0, incorporatesIndex).trim()
+                : rest.trim();
+                
+                // Remove trailing semicolon if present
+                if (description.endsWith(';')) {
+                  description = description.slice(0, -1).trim();
+                }              
+
+                const incorporatesText = incorporatesIndex >= 0
+                  ? rest.slice(incorporatesIndex).trim()
+                  : "";
+
+                // Split the incorporates text on semicolon for bullet points
+                const categoriesList = incorporatesText
+                  ? incorporatesText
+                      .replace(/^Incorporates\s*/, "")
+                      .split(";")
+                      .map((s) => s.trim())
+                      .filter((s) => s.length > 0)
+                  : [];
+
+                // Specifically fix "Incorporates Travel by ... Monetization through ..." into two bullets
+                const processedCategoriesList = [];
+                categoriesList.forEach((item) => {
+                  if (item.includes("Monetization")) {
+                    // Split the sentence into two if contains Monetization and Travel in one bullet
+                    const parts = item.split(/Monetization through/);
+                    if (parts.length === 2) {
+                      processedCategoriesList.push(parts[0].trim());
+                      processedCategoriesList.push("Monetization through" + parts[1].trim());
+                    } else {
+                      processedCategoriesList.push(item);
+                    }
+                  } else {
+                    processedCategoriesList.push(item);
                   }
-                  const incorporatesIndex = rest.indexOf("Incorporates");
-                  const description = incorporatesIndex >= 0
-                    ? rest.slice(0, incorporatesIndex).trim()
-                    : rest.trim();
-                  const incorporatesText = incorporatesIndex >= 0
-                    ? rest.slice(incorporatesIndex).trim()
-                    : "";
-                  const categoriesList = incorporatesText
-                    ? incorporatesText
-                        .split(";")
-                        .map((s) => s.replace(/^Incorporates\s*/, "").trim())
-                        .filter((s) => s.length > 0)
-                    : [];
+                });
 
                   return (
                     <div
@@ -333,11 +359,18 @@ function MainScreen() {
                             color: "#64748b",
                             lineHeight: "1.8",
                           }}>
-                            {categoriesList.map((cat, i) => (
-                              <li key={i} style={{ marginBottom: "5px" }}>
-                                {cat}
-                              </li>
-                            ))}
+                            {categoriesList.map((cat, i) => {
+                              // Remove period from the end of the second bullet point
+                              let formattedCat = cat;
+                              if (i === 1 && formattedCat.endsWith('.')) {
+                                formattedCat = formattedCat.slice(0, -1).trim();
+                              }
+                              return (
+                                <li key={i} style={{ marginBottom: "5px" }}>
+                                  {formattedCat}
+                                </li>
+                              );
+                            })}
                           </ul>
                         </div>
                       )}
