@@ -279,23 +279,37 @@ function MainScreen() {
                 // Everything after title
                 const rest = ideaWithoutPrefix.replace(/['"][^'"]+['"]/, "").trim();
 
-                // Find where details ("Incorporates" or "Revenue") begin
-                const firstKeywordIndex = rest.search(/Incorporates|Revenue/);
+                // Find where "Revenue" starts
+                const revenueIndex = rest.search(/Revenue/);
 
-                // Description comes before details
-                let description = firstKeywordIndex >= 0
-                  ? rest.slice(0, firstKeywordIndex).trim().replace(/^[,.]\s*/, "")
-                  : rest;
+                // Find where the first "Incorporates" starts
+                const incorporatesIndex = rest.search(/Incorporates/);
 
-                // Grab the block of details after description
-                const detailsText = firstKeywordIndex >= 0 ? rest.slice(firstKeywordIndex).trim() : "";
+                // Description = text before first "Incorporates" or "Revenue"
+                let descriptionEndIndex = incorporatesIndex >= 0 ? incorporatesIndex : revenueIndex >= 0 ? revenueIndex : rest.length;
+                let description = rest.slice(0, descriptionEndIndex).trim().replace(/^[,\.]\s*/, "");
 
-                // Split bullet points by semicolons, strip "Incorporates"
-                const categoriesList = detailsText
-                  ? detailsText
-                      .split(/\s*;\s*/)       // split on ;
-                      .map(s => s.replace(/^Incorporates\s*/i, "").trim())
-                      .filter(s => s.length > 0)
+                // Extract incorporates text substring (between Incorporates and Revenue)
+                let incorporatesText = "";
+                if (incorporatesIndex >= 0) {
+                  incorporatesText = revenueIndex >= 0 
+                    ? rest.slice(incorporatesIndex, revenueIndex).trim() 
+                    : rest.slice(incorporatesIndex).trim();
+                }
+
+                // Extract revenue text substring (from Revenue to end)
+                let revenueText = "";
+                if (revenueIndex >= 0) {
+                  revenueText = rest.slice(revenueIndex).trim();
+                }
+
+                // Parse bullet points from incorporatesText: split on semicolon, strip "Incorporates"
+                const incorporatesList = incorporatesText
+                  ? incorporatesText
+                      .replace(/^Incorporates\s*/i, "")
+                      .split(/\s*;\s*/)
+                      .map((s) => s.trim())
+                      .filter((s) => s.length > 0)
                   : [];
 
                 return (
@@ -310,6 +324,7 @@ function MainScreen() {
                       marginBottom: "12px",
                     }}
                   >
+                    {/* Title without label */}
                     <h3
                       style={{
                         color: "#2563eb",
@@ -321,6 +336,8 @@ function MainScreen() {
                     >
                       {title}
                     </h3>
+
+                    {/* Description below title, no prefix */}
                     <div
                       style={{
                         fontWeight: "500",
@@ -333,7 +350,9 @@ function MainScreen() {
                     >
                       {description}
                     </div>
-                    {categoriesList.length > 0 && (
+
+                    {/* Bullet points for incorporates */}
+                    {incorporatesList.length > 0 && (
                       <ul
                         style={{
                           margin: "10px 0 0 20px",
@@ -344,13 +363,29 @@ function MainScreen() {
                           lineHeight: "1.8",
                         }}
                       >
-                        {categoriesList.map((point, i) => (
+                        {incorporatesList.map((point, i) => (
                           <li key={i} style={{ marginBottom: "5px" }}>
                             {point}
                           </li>
                         ))}
                       </ul>
                     )}
+
+                    {/* Revenue section separated, no bullet */}
+                    {revenueText && (
+                      <div
+                        style={{
+                          fontWeight: "600",
+                          fontSize: "16px",
+                          marginTop: "16px",
+                          color: "#16a34a",
+                        }}
+                      >
+                        {revenueText}
+                      </div>
+                    )}
+
+                    {/* Submit button */}
                     <button
                       style={{
                         marginTop: "16px",
@@ -371,6 +406,7 @@ function MainScreen() {
                   </div>
                 );
               })}
+
 
               </div>
             </div>
