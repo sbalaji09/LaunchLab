@@ -284,7 +284,7 @@ function MainScreen() {
 
                 // Description comes before details
                 let description = firstKeywordIndex >= 0
-                  ? rest.slice(0, firstKeywordIndex).trim().replace(/^[,\.]\s*/, "")
+                  ? rest.slice(0, firstKeywordIndex).trim().replace(/^[,.]\s*/, "")
                   : rest;
 
                 // Grab the block of details after description
