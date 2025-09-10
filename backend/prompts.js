@@ -30,14 +30,22 @@ function generateIdeasPrompt(categories) {
         - Respond ONLY with a valid JSON array of 15 startup ideas.
         - Do NOT include any extra text, explanations, or introductions.
 
-        Example format:
+        Formatting rules (must be followed exactly):
+        - Return ONLY a valid JSON array of 15 strings.
+        - Each string must follow this pattern:
+        "Idea X: 'Name', One-sentence tagline. Incorporates [Category1] by ...; Incorporates [Category2] by ...; ...; Revenue through [revenue model]."
+        - Always start each idea with "Idea X:" (with X being the idea number).
+        - The name must always be in single quotes, followed by a comma, then a one-sentence tagline.
+        - Each category must explicitly appear in order, beginning with "Incorporates".
+        - End with exactly one "Revenue through ..." statement.
+        - Do NOT add markdown, bullet points, explanations, or line breaks. Only the JSON array of strings.
 
+        Example 1:
         [
-        "Idea 1 description: two to three sentence summary; Incorporates [Category 1] by ...; Incorporates [Category 2] by ...; ...",
-        "Idea 2 description: ...",
-        ...
-        "Idea 15 description: ..."
-        ]
+        "Idea 1: 'CodeFlow', Collaborative Coding Environment for Teams. Incorporates Productivity by enhancing team communication and task coordination; Incorporates Web Development by offering real-time code editing, review, and testing capabilities. Revenue through subscription plans based on the number of users and features.",
+        "Idea 3: 'TaskBot', AI-Powered Task Assigner for Developers. Incorporates Productivity by automating task allocation based on team members' skills and workload; Incorporates Web Development by integrating with popular project management tools and code repositories. Revenue through subscription plans and API integration fees.",
+        ...]
+
 
         End of instructions.
     `;

@@ -269,136 +269,109 @@ function MainScreen() {
               </h2>
               <div style={{ display: "grid", gap: "28px", marginTop: "20px" }}>
               {ideas.map((idea, index) => {
-                // Parse idea string (title, description, categories)
-                const [titlePart, rest] = idea.split(/:(.+)/);
-                let title = titlePart.replace(/^['"]|['"]$/g, '').trim();
-                if (title.endsWith(",") || title.endsWith(";")) {
-                  title = title.slice(0, -1).trim();
-                }
-                
-                // Find where "Incorporates" starts
-                const incorporatesIndex = rest.indexOf("Incorporates");
-                
-                // Extract description portion before "Incorporates"
-                let description = incorporatesIndex >= 0
-                  ? rest.slice(0, incorporatesIndex).trim()
-                  : rest.trim();
-                
-                // Remove trailing semicolon from description if present
-                if (description.endsWith(';')) {
-                  description = description.slice(0, -1).trim();
-                }
-                
-                // Extract the incorporatesText including and after "Incorporates"
-                const incorporatesText = incorporatesIndex >= 0
-                  ? rest.slice(incorporatesIndex).trim()
-                  : "";
-                
-                // Split incorporatesText on semicolons; removes "Incorporates" prefix from first item
-                const categoriesList = incorporatesText
-                  ? incorporatesText
-                      .replace(/^Incorporates\s*/, "")
-                      .split(/\s*;\s*/)  // split on semicolons with optional spaces around
-                      .map(s => s.trim())
+                // Remove "Idea X:" prefix
+                const ideaWithoutPrefix = idea.replace(/^Idea\s*\d+:\s*/, "").trim();
+
+                // Extract title (first quoted part)
+                const titleMatch = ideaWithoutPrefix.match(/['"]([^'"]+)['"]/);
+                const title = titleMatch ? titleMatch[1].trim() : "";
+
+                // Everything after title
+                const rest = ideaWithoutPrefix.replace(/['"][^'"]+['"]/, "").trim();
+
+                // Find where details ("Incorporates" or "Revenue") begin
+                const firstKeywordIndex = rest.search(/Incorporates|Revenue/);
+
+                // Description comes before details
+                let description = firstKeywordIndex >= 0
+                  ? rest.slice(0, firstKeywordIndex).trim().replace(/^[,\.]\s*/, "")
+                  : rest;
+
+                // Grab the block of details after description
+                const detailsText = firstKeywordIndex >= 0 ? rest.slice(firstKeywordIndex).trim() : "";
+
+                // Split bullet points by semicolons, strip "Incorporates"
+                const categoriesList = detailsText
+                  ? detailsText
+                      .split(/\s*;\s*/)       // split on ;
+                      .map(s => s.replace(/^Incorporates\s*/i, "").trim())
                       .filter(s => s.length > 0)
                   : [];
-                
 
-                // Specifically fix "Incorporates Travel by ... Monetization through ..." into two bullets
-                const processedCategoriesList = [];
-                categoriesList.forEach((item) => {
-                  if (item.includes("Monetization")) {
-                    // Split the sentence into two if contains Monetization and Travel in one bullet
-                    const parts = item.split(/Monetization through/);
-                    if (parts.length === 2) {
-                      processedCategoriesList.push(parts[0].trim());
-                      processedCategoriesList.push("Monetization through" + parts[1].trim());
-                    } else {
-                      processedCategoriesList.push(item);
-                    }
-                  } else {
-                    processedCategoriesList.push(item);
-                  }
-                });
-
-                  return (
-                    <div
-                      key={index}
+                return (
+                  <div
+                    key={index}
+                    style={{
+                      backgroundColor: "#ffffff",
+                      borderRadius: "16px",
+                      padding: "28px 32px",
+                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                      border: "1px solid #e0e7ff",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <h3
                       style={{
-                        backgroundColor: "#ffffff",
-                        borderRadius: "16px",
-                        padding: "28px 32px",
-                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                        border: "1px solid #e0e7ff",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      <h3 style={{
                         color: "#2563eb",
                         fontWeight: "900",
                         fontSize: "24px",
                         marginBottom: "10px",
                         letterSpacing: "0.02em",
-                      }}>
-                        {title}
-                      </h3>
-                      <div style={{
+                      }}
+                    >
+                      {title}
+                    </h3>
+                    <div
+                      style={{
                         fontWeight: "500",
                         fontSize: "17px",
                         color: "#374151",
                         lineHeight: "1.7",
                         letterSpacing: "0.005em",
                         marginBottom: "16px",
-                      }}>
-                        <span style={{ fontWeight: "700", color: "#1e293b" }}>Description: </span>
-                        {description}
-                      </div>
-                      {categoriesList.length > 0 && (
-                        <div style={{ marginBottom: "10px" }}>
-                          <span style={{ fontWeight: "700", color: "#0ea5e9" }}>Incorporates:</span>
-                          <ul style={{
-                            margin: "10px 0 0 18px",
-                            padding: 0,
-                            fontSize: "15px",
-                            fontWeight: "500",
-                            color: "#64748b",
-                            lineHeight: "1.8",
-                          }}>
-                            {categoriesList.map((cat, i) => {
-                              // Remove period from the end of the second bullet point
-                              let formattedCat = cat;
-                              if (i === 1 && formattedCat.endsWith('.')) {
-                                formattedCat = formattedCat.slice(0, -1).trim();
-                              }
-                              return (
-                                <li key={i} style={{ marginBottom: "5px" }}>
-                                  {formattedCat}
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      )}
-                      <button
-                        style={{
-                          marginTop: "16px",
-                          padding: "10px 22px",
-                          borderRadius: "10px",
-                          backgroundColor: "#16a34a",
-                          color: "white",
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: "16px",
-                          fontWeight: "700",
-                          transition: "background-color 0.2s",
-                        }}
-                        onClick={() => handleSubmitIdea(idea)}
-                      >
-                        Submit This Idea
-                      </button>
+                      }}
+                    >
+                      {description}
                     </div>
-                  );
-                })}
+                    {categoriesList.length > 0 && (
+                      <ul
+                        style={{
+                          margin: "10px 0 0 20px",
+                          padding: 0,
+                          fontSize: "15px",
+                          fontWeight: "500",
+                          color: "#64748b",
+                          lineHeight: "1.8",
+                        }}
+                      >
+                        {categoriesList.map((point, i) => (
+                          <li key={i} style={{ marginBottom: "5px" }}>
+                            {point}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <button
+                      style={{
+                        marginTop: "16px",
+                        padding: "10px 22px",
+                        borderRadius: "10px",
+                        backgroundColor: "#16a34a",
+                        color: "white",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "700",
+                        transition: "background-color 0.2s",
+                      }}
+                      onClick={() => handleSubmitIdea(idea)}
+                    >
+                      Submit This Idea
+                    </button>
+                  </div>
+                );
+              })}
+
               </div>
             </div>
 
