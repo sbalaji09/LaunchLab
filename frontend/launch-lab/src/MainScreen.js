@@ -287,7 +287,7 @@ function MainScreen() {
 
                 // Description = text before first "Incorporates" or "Revenue"
                 let descriptionEndIndex = incorporatesIndex >= 0 ? incorporatesIndex : revenueIndex >= 0 ? revenueIndex : rest.length;
-                let description = rest.slice(0, descriptionEndIndex).trim().replace(/^[,\.]\s*/, "");
+                let description = rest.slice(0, descriptionEndIndex).trim().replace(/^[,.]\s*/, "");
 
                 // Extract incorporates text substring (between Incorporates and Revenue)
                 let incorporatesText = "";
