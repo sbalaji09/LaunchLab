@@ -1,77 +1,59 @@
-const { execSync } = require('child_process');
-const { generateIdeasPrompt, generateIdeaRefinePrompt } = require('./prompts.js');
+import OpenAI from "openai";
+import { generateIdeasPrompt, generateIdeaRefinePrompt } from "./prompts.js";
 
-function HandleGenerateIdeaList(categories) {
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+async function HandleGenerateIdeaList(categories) {
   const prompt = generateIdeasPrompt(categories);
 
   try {
-    // Escape double quotes in the prompt to safely include in shell command
-    const safePrompt = prompt.replace(/"/g, '\\"');
-    const command = `ollama run mistral "${safePrompt}"`;
+    const response = await openai.chat.completions.create({
+      model: "gpt-5",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 1000,
+    });
 
-    // Run the command synchronously and get output as string
-    const output = execSync(command, { encoding: "utf8" });
+    const content = response.choices[0].message.content;
 
-    console.log("Raw LLM output:", output);
-
-    // Try to extract JSON array from output text using regex
-    const jsonMatch = output.match(/\[.*\]/s);
-    const jsonString = jsonMatch ? jsonMatch[0] : output;
-
-    // Validate extracted string is parsable JSON
-    try {
-      const ideas = JSON.parse(jsonString);
-      if (!Array.isArray(ideas)) {
-        console.error("Parsed JSON is not an array:", ideas);
-        return null;
-      }
-      // Success: return parsed ideas array
-      return ideas;
-    } catch (parseError) {
-      console.error("Failed to parse JSON string:", parseError);
-      // Optionally log or process the faulty jsonString further here
+    // Parse JSON array from content expected to be a JSON string of ideas
+    const ideas = JSON.parse(content);
+    if (!Array.isArray(ideas)) {
+      console.error("Parsed JSON is not an array:", ideas);
       return null;
     }
+    return ideas;
   } catch (error) {
-    console.error("Error running Mistral via Ollama:", error);
+    console.error("OpenAI GPT-5 API error:", error);
     return null;
   }
 }
 
-function HandleRefineIdea(basic_idea) {
+async function HandleRefineIdea(basic_idea) {
   const prompt = generateIdeaRefinePrompt(basic_idea);
+
   try {
-    // Escape double quotes in the prompt to safely include in shell command
-    const safePrompt = prompt.replace(/"/g, '\\"');
-    const command = `ollama run mistral "${safePrompt}"`;
+    const response = await openai.chat.completions.create({
+      model: "gpt-5",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 1000,
+    });
 
-    // Run the command synchronously and get output as string
-    const output = execSync(command, { encoding: "utf8" });
+    const content = response.choices[0].message.content;
 
-    console.log("Raw LLM output:", output);
-
-    // Try to extract JSON array from output text using regex
-    const jsonMatch = output.match(/\[.*\]/s);
-    const jsonString = jsonMatch ? jsonMatch[0] : output;
-
-    // Validate extracted string is parsable JSON
-    try {
-      const ideas = JSON.parse(jsonString);
-      if (!Array.isArray(ideas)) {
-        console.error("Parsed JSON is not an array:", ideas);
-        return null;
-      }
-      // Success: return parsed ideas array
-      return ideas;
-    } catch (parseError) {
-      console.error("Failed to parse JSON string:", parseError);
-      // Optionally log or process the faulty jsonString further here
+    const ideas = JSON.parse(content);
+    if (!Array.isArray(ideas)) {
+      console.error("Parsed JSON is not an array:", ideas);
       return null;
     }
+    return ideas;
   } catch (error) {
-    console.error("Error running Mistral via Ollama:", error);
+    console.error("OpenAI GPT-5 API error:", error);
     return null;
   }
 }
 
-module.exports = { HandleGenerateIdeaList, HandleRefineIdea };
+export { HandleGenerateIdeaList, HandleRefineIdea };
