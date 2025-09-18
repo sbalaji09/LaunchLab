@@ -1,2 +1,5 @@
 .env
-*.secret
+node_modules/
+**/node_modules
+*.secretnode_modules/
+*/node_modules/

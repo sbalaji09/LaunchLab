@@ -47,7 +47,7 @@ function MainScreen() {
   async function handleSubmitIdea(idea) {
     console.log('Submitting idea:', idea);
     try {
-      const response = await fetch('/api/refine-idea', {
+      const response = await fetch('/api/refine-ideas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idea: { basic_idea: idea } }), // Match expected backend format
