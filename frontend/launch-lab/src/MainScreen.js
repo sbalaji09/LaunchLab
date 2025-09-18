@@ -28,7 +28,7 @@ function MainScreen() {
 
   async function passCategories(categories) {
     try {
-        const response = await fetch('http://launch-lab-m3l6.vercel.app/api/submit-categories', {
+        const response = await fetch('/api/submit-categories', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ categories }),
@@ -47,7 +47,7 @@ function MainScreen() {
   async function handleSubmitIdea(idea) {
     console.log('Submitting idea:', idea);
     try {
-      const response = await fetch('http://launch-lab-m3l6.vercel.app/api/refine-idea', {
+      const response = await fetch('/api/refine-idea', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idea: { basic_idea: idea } }), // Match expected backend format
