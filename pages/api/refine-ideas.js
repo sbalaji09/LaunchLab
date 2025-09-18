@@ -1,4 +1,4 @@
-const { HandleRefineIdea } = require('../../backend/api.js');
+import { HandleRefineIdea } from '../../backend/api.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

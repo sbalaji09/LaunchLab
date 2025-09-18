@@ -1,5 +1,5 @@
 // Import from your backend folder
-const { HandleGenerateIdeaList } = require('../../backend/api.js');
+import { HandleGenerateIdeaList } from '../../backend/api.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

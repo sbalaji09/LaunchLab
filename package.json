@@ -1,5 +1,14 @@
 {
+  "scripts": {
+    "dev": "next dev",
+    "build": "node vercel-build.js && next build",
+    "start": "next start",
+    "vercel-build": "node vercel-build.js"
+  },
   "dependencies": {
+    "next": "^13.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
     "dotenv": "^17.2.2"
   }
 }
