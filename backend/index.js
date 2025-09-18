@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
 const app = express();
 
 // Middleware to parse JSON body and enable CORS
@@ -9,16 +10,16 @@ app.use(express.json());
 const { HandleGenerateIdeaList, HandleRefineIdea } = require('./api.js');
 
 // API routes
-app.post('/api/submit-categories', (req, res) => {
+app.post('/api/submit-categories', async (req, res) => {
   try {
     const categories = req.body.categories;
     console.log('Received categories:', categories);
-    
+
     if (!categories || !Array.isArray(categories)) {
       return res.status(400).json({ error: 'Categories array is required' });
     }
 
-    const ideas = HandleGenerateIdeaList(categories);
+    const ideas = await HandleGenerateIdeaList(categories);
     console.log("IDEAS", ideas);
     res.json({ ideas: ideas });
   } catch (error) {
@@ -65,6 +66,4 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Export the Express API for Vercel
-module.exports = app;
-
 module.exports = app;
